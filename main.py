@@ -5,7 +5,7 @@ from attacker import Attacker
 
 username = argv[1]
 passlist = argv[2]
-thread_c = int(argv[3])
+# thread_c = int(argv[3])
 
 attacker = Attacker(username, passlist)
 attacker.start()

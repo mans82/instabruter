@@ -7,7 +7,7 @@ username = argv[1]
 passlist = argv[2]
 thread_c = int(argv[3])
 
-attacker = Attacker(username, passlist, thread_c)
+attacker = Attacker(username, passlist)
 attacker.start()
 try:
     attacker.block()

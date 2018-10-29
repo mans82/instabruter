@@ -58,7 +58,7 @@ class Bruter(threading.Thread):
     def get_new_tor_identity(self):
         import socket as sock
         connection = sock.socket(sock.AF_INET, sock.SOCK_STREAM)
-        connection.connect(('127.0.0.1', self.__tor_control_port))
+        connection.connect((self.__tor_hostname, self.__tor_control_port))
         connection.send(('AUTHENTICATE "%s"\n' % self.__tor_control_port_password).encode())
         # result = connection.recv(3).decode('ascii')
         # print('Getting new tor identity')
@@ -174,37 +174,48 @@ class Attacker():
         self.__username = username
         self.__passlist = passlist
         self.__total_scanned = 0
+        self.__config = {}
 
         if 'continue_attack_config' in kwargs:
+            # open continue_attack file and parse it
             with open(file = kwargs['continue_attack_config'], mode = 'r') as continue_attack_file:
                 config = json.load(fp = continue_attack_file)
                 
                 self.__username = config['username']
                 self.__passlist = config['passlist']
                 self.__thread_count = config['thread_count']
-                self.__use_tor = config['use_tor']
                 self.__total_scanned = config['total_scanned']
+                self.__use_tor = config['use_tor']
+                self.__config['torhostname'] = config['torhostname']
+                self.__config['torsocksport'] = config['torsocksport']
+                self.__config['torcontrolport'] = config['torcontrolport']
+                self.__config['torcontrolportpassword'] = config['torcontrolportpassword']
+        else:
+            # parse the config
+            with open(file = 'instabruter.conf', mode = 'r') as config_file:
+                for line in config_file:
+                    line = line.split(' ')
+                    if len(line) != 2:
+                        continue
+                    key, value = line[0].lower(), line[1][:-1] # should remove the \n at the end of the line
+                    # extract needed configs
+                    if key == 'threadcount':
+                        self.__thread_count = int(value)
+                    else:
+                        self.__config[key] = value
 
+        # count the number of lines of passlist file
         with open(file = self.__passlist, mode = 'r') as passlist_file:
             self.__passlist_lines_count = sum([1 for line in passlist_file])
         
+        # init the file object, to pass to bruter threads
         self.__passlist_file = open(file = self.__passlist, mode = 'r')
+
+        # go until the last read line
         for i in range(self.__total_scanned):
             self.__passlist_file.readline()
         
-        # parse the config
-        with open(file = 'instabruter.conf', mode = 'r') as config_file:
-            self.__config = {}
-            for line in config_file:
-                line = line.split(' ')
-                if len(line) != 2:
-                    continue
-                key, value = line[0].lower(), line[1][:-1] # should remove the \n at the end of the line
-                # extract needed configs
-                if key == 'threadcount':
-                    self.__thread_count = int(value)
-                else:
-                    self.__config[key] = value
+        
         
         # keeps a list of bruter objects
         self.__bruters = []

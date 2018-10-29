@@ -1,5 +1,6 @@
 import requests
 import threading
+import json
 from time import sleep
 from sys import exit as sysexit, stderr
 
@@ -166,18 +167,30 @@ class Bruter(threading.Thread):
         self.__running = False
 
 class Attacker():
-    def __init__(self, username, passlist):
+    def __init__(self, username, passlist, **kwargs):
         # defaults
         self.__thread_count = 1
         self.__use_tor = False
         self.__username = username
-
-        with open(file = passlist, mode = 'r') as passlist_file:
-            self.__passlist_lines_count = sum([1 for line in passlist_file])
-        
+        self.__passlist = passlist
         self.__total_scanned = 0
 
-        self.__passlist_file = open(file = passlist, mode = 'r')
+        if 'continue_attack_config' in kwargs:
+            with open(file = kwargs['continue_attack_config'], mode = 'r') as continue_attack_file:
+                config = json.load(fp = continue_attack_file)
+                
+                self.__username = config['username']
+                self.__passlist = config['passlist']
+                self.__thread_count = config['thread_count']
+                self.__use_tor = config['use_tor']
+                self.__total_scanned = config['total_scanned']
+
+        with open(file = self.__passlist, mode = 'r') as passlist_file:
+            self.__passlist_lines_count = sum([1 for line in passlist_file])
+        
+        self.__passlist_file = open(file = self.__passlist, mode = 'r')
+        for i in range(self.__total_scanned):
+            self.__passlist_file.readline()
         
         # parse the config
         with open(file = 'instabruter.conf', mode = 'r') as config_file:
@@ -195,6 +208,10 @@ class Attacker():
         
         # keeps a list of bruter objects
         self.__bruters = []
+
+    @classmethod
+    def continue_attack(cls, config_file):
+        return cls(None, None, continue_attack_config = config_file)
         
 
     def start(self):

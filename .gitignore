@@ -1,4 +1,5 @@
 *.zip
 *.txt
+instabruter.conf
 __pycache__
 .vscode

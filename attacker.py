@@ -241,6 +241,20 @@ class Attacker():
                     self.__passlist_lines_count,
                     int((self.__total_scanned / self.__passlist_lines_count) * 10000) / 100
                 ), end = '')
+                cur_status = {
+                    'username' : self.__username,
+                    'passlist' : self.__passlist,
+                    'thread_count' : self.__thread_count,
+                    'total_scanned' : self.__total_scanned,
+                    'use_tor' : self.__use_tor,
+                    'torhostname' : self.__config['torhostname'],
+                    'torsocksport' : self.__config['torsocksport'],
+                    'torcontrolport' : self.__config['torcontrolport'],
+                    'torcontrolportpassword' : self.__config['torcontrolportpassword']
+                }
+                cur_status = json.dumps(cur_status)
+                with open(file = self.__username, mode = 'w') as continue_attack_file:
+                    continue_attack_file.write(cur_status)
 
         def on_error(error_code):
             # If there is any error, this callback will trigger. The `error_code` shows what was the

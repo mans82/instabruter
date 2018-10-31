@@ -21,7 +21,7 @@ elif args.username and args.passlist:
     attacker = Attacker(args.username, args.passlist)
 else:
     # not enough arguments
-    parser.error('not enough arguments: use either -c or username passlist')
+    parser.print_usage()
 
 attacker.start()
 

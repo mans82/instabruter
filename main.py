@@ -10,8 +10,8 @@ strings = {
 
 parser = argparse.ArgumentParser(description = strings['DESCRIPTION'])
 parser.add_argument('-c', '--continue-scan', action = 'store', default = None, dest = 'continue_file')
-parser.add_argument('USERNAME', action = 'store', default = None)
-parser.add_argument('PASSLIST', action = 'store', default = None)
+parser.add_argument('username', action = 'store', default = None)
+parser.add_argument('passlist', action = 'store', default = None)
 
 args = parser.parse_args()
 
@@ -21,6 +21,7 @@ else:
     attacker = Attacker(args.username, args.passlist)
 
 attacker.start()
+
 try:
     attacker.block()
     print()

@@ -22,6 +22,7 @@ elif args.username and args.passlist:
 else:
     # not enough arguments
     parser.print_usage()
+    sysexit(0)
 
 attacker.start()
 

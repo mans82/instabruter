@@ -10,8 +10,8 @@ strings = {
 
 parser = argparse.ArgumentParser(description = strings['DESCRIPTION'])
 parser.add_argument('-c', '--continue-scan', action = 'store', default = None, dest = 'continue_file')
-parser.add_argument('username', action = 'store', default = None, required = False)
-parser.add_argument('passlist', action = 'store', default = None, required = False)
+parser.add_argument('-u', '--username', action = 'store', default = None)
+parser.add_argument('-p', '--passlist', action = 'store', default = None)
 
 args = parser.parse_args()
 

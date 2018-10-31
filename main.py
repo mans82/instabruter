@@ -9,9 +9,9 @@ strings = {
 }
 
 parser = argparse.ArgumentParser(description = strings['DESCRIPTION'])
-parser.add_argument('-c', '--continue-scan', action = 'store', default = None, dest = 'continue_file', type = argparse.FileType('r'))
-parser.add_argument('USERNAME', action = 'store', default = None, dest = 'username')
-parser.add_argument('PASSLIST', action = 'store', default = None, dest = 'passlist')
+parser.add_argument('-c', '--continue-scan', action = 'store', default = None, dest = 'continue_file')
+parser.add_argument('USERNAME', action = 'store', default = None)
+parser.add_argument('PASSLIST', action = 'store', default = None)
 
 args = parser.parse_args(argv)
 

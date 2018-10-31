@@ -5,7 +5,7 @@ from attacker import Attacker
 import argparse
 
 strings = {
-    'DESCRIPTION' : 'A simple tool for doing brute-force attack on instagram accounts, with support for tor network.'
+    'DESCRIPTION' : 'A tool for brute-forcing instagram accounts, with support for Tor.'
 }
 
 parser = argparse.ArgumentParser(description = strings['DESCRIPTION'])

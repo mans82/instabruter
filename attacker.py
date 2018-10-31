@@ -38,7 +38,7 @@ class Bruter(threading.Thread):
         # self.__notifier = notifier
         
         # parse config (if you want to add any config, do it here):
-        self.__use_tor = False if config['usetor'] == '0' else True
+        self.__use_tor = config['use_tor']
         if self.__use_tor:
             self.__tor_hostname = config['torhostname']
             self.__tor_control_port = int(config['torcontrolport'])
@@ -201,6 +201,10 @@ class Attacker():
                     # extract needed configs
                     if key == 'threadcount':
                         self.__thread_count = int(value)
+                    elif key == 'usetor':
+                        self.__use_tor = False if value == '0' else True
+                        # re-add it, as bruters need it too
+                        self.__config['use_tor'] = self.__use_tor
                     else:
                         self.__config[key] = value
 
@@ -253,7 +257,7 @@ class Attacker():
                     'torcontrolportpassword' : self.__config['torcontrolportpassword']
                 }
                 cur_status = json.dumps(cur_status)
-                with open(file = self.__username, mode = 'w') as continue_attack_file:
+                with open(file = '%s.isb' % self.__username, mode = 'w') as continue_attack_file:
                     continue_attack_file.write(cur_status)
 
         def on_error(error_code):

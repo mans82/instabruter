@@ -165,7 +165,7 @@ class Attacker():
                 parsed_line = line[:-1].split(' ') # [:-1] : for removing the \n from end of `line`
                 if len(parsed_line) != 2: # not a normal line, lets just ignore it
                     continue
-                self.__config[parsed_line[0]] = parsed_line[1]
+                self.__config[parsed_line[0].lower()] = parsed_line[1]
         
         # then, read the saved attack file, if any:
         self.__saved_attack_file = config.get('saved_scan_file', None)
@@ -192,8 +192,8 @@ class Attacker():
 
 
         self.__passlist = self.__config['passlist']
-        self.__thread_count = int(self.__config.get('thread_count', 8))
-        self.__total_scanned = int(self.__config.get('total_scanned', 0))
+        self.__thread_count = int(self.__config.get('threadcount', 8))
+        self.__total_scanned = int(self.__config.get('totalscanned', 0))
 
         # count the number of lines of passlist file
         with open(file = self.__passlist, mode = 'r') as passlist_file:
@@ -233,8 +233,8 @@ class Attacker():
                 cur_status = {
                     'username' : self.__config['username'],
                     'passlist' : self.__passlist,
-                    'thread_count' : self.__thread_count,
-                    'total_scanned' : self.__total_scanned,
+                    'threadcount' : self.__thread_count,
+                    'totalscanned' : self.__total_scanned,
                     'usetor' : self.__config['usetor'],
                     'torhostname' : self.__config['torhostname'],
                     'torsocksport' : self.__config['torsocksport'],

@@ -1,6 +1,6 @@
 from sys import argv
 from sys import exit as sysexit
-from os.path import isfile
+from os.path import isfile, exists
 from time import sleep
 from attacker import Attacker
 import argparse
@@ -17,13 +17,32 @@ parser.add_argument('-p', '--passlist', action = 'store', default = None)
 
 args = vars(parser.parse_args())
 
-if args['saved_scan_file'] or (args['username'] and args['passlist']):
-    attacker = Attacker(args)
-else:
-    # not enough arguments
-    parser.print_usage()
-    sysexit(0)
+# validate `args`:
+if not args['saved_scan_file'] == None:
+    if not (args['username'] == None and args['password']) == None:
+        parser.error('Not enough arguments: either username and passlist, or saved_scan_file should be given.')
 
+# validate `args`:
+for key in args:
+    if args[key] == None:
+        continue
+    if key == 'saved_scan_file':
+        if not exists(args[key]):
+            parser.error('Could not open %s: No such file or directory.' % args[key])
+        elif not isfile(args[key]):
+            parser.error('Could not open %s: Not a file.' % args[key])
+    elif key == 'passlist':
+        if not exists(args[key]):
+            parser.error('Could not open %s: No such file or directory.' % args[key])
+            sysexit(0)
+        elif not isfile(args[key]):
+            parser.error('Could not open %s: Not a file.' % args[key])
+            sysexit(0)
+    
+
+
+
+attacker = Attacker(args)
 attacker.start()
 
 try:

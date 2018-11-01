@@ -13,6 +13,7 @@ parser = argparse.ArgumentParser(description = strings['DESCRIPTION'])
 parser.add_argument('-c', '--continue-scan', action = 'store', default = None, dest = 'saved_scan_file')
 parser.add_argument('-u', '--username', action = 'store', default = None)
 parser.add_argument('-p', '--passlist', action = 'store', default = None)
+parser.add_argument('-t' ,'--threads', action = 'store', default = None, type = int)
 # parser.add_argument('-o', '--save-scan', action = 'store', default = None)
 
 args = vars(parser.parse_args())

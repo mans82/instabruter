@@ -17,12 +17,12 @@ parser.add_argument('-p', '--passlist', action = 'store', default = None)
 
 args = vars(parser.parse_args())
 
-# validate `args`:
-if not args['saved_scan_file'] == None:
-    if not (args['username'] == None and args['password']) == None:
+# validate `args`: numbers
+if args['saved_scan_file'] == None:
+    if args['username'] == None or args['passlist'] == None:
         parser.error('Not enough arguments: either username and passlist, or saved_scan_file should be given.')
 
-# validate `args`:
+# validate `args`: values
 for key in args:
     if args[key] == None:
         continue

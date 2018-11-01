@@ -192,7 +192,7 @@ class Attacker():
 
 
         self.__passlist = self.__config['passlist']
-        self.__thread_count = int(self.__config.get('threadcount', 8))
+        self.__threads = int(self.__config.get('threads', 8))
         self.__total_scanned = int(self.__config.get('totalscanned', 0))
 
         # count the number of lines of passlist file
@@ -228,7 +228,7 @@ class Attacker():
                 cur_status = {
                     'username' : self.__config['username'],
                     'passlist' : self.__passlist,
-                    'threadcount' : self.__thread_count,
+                    'threads' : self.__threads,
                     'totalscanned' : self.__total_scanned,
                     'usetor' : self.__config['usetor'],
                     'torhostname' : self.__config['torhostname'],
@@ -247,11 +247,11 @@ class Attacker():
             # Bruter.ERR_TOO_MANY_REQUESTS.
             pass
         
-        for i in range(self.__thread_count):
+        for i in range(self.__threads):
             bruter = Bruter(self.__config['username'], self.__passlist_file, self.__config, on_success, on_error, i + 1)
             self.__bruters.append(bruter)
             bruter.start()
-            print(' ==> Starting thread: %s/%s\r' % (i + 1, self.__thread_count), end = '')
+            print(' ==> Starting thread: %s/%s\r' % (i + 1, self.__threads), end = '')
 
         print()        
         print(' ==> Starting attack for %s' % self.__config['username'])

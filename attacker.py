@@ -209,11 +209,6 @@ class Attacker():
         # keeps a list of bruter objects
         self.__bruters = []
 
-    # @classmethod
-    # def continue_attack(cls, config_file):
-        # return cls(None, None, continue_attack_config = config_file)
-        
-
     def start(self):
         def on_success(is_found, password):
             # For each successful scan (whether the password is found or not), this callback will trigger.

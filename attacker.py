@@ -163,7 +163,7 @@ class Attacker():
         with open(file = self.__config_file, mode = 'r') as config_file:
             for line in config_file:
                 parsed_line = line[:-1].split(' ') # [:-1] : for removing the \n from end of `line`
-                if len(parsed_line) != 2: # not a normal line, lets just ignore it
+                if len(parsed_line) != 2: # not a parsable line, lets just ignore it
                     continue
                 self.__config[parsed_line[0].lower()] = parsed_line[1]
         

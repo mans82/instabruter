@@ -165,7 +165,11 @@ class Attacker():
                 parsed_line = line[:-1].split(' ') # [:-1] : for removing the \n from end of `line`
                 if len(parsed_line) != 2: # not a parsable line, lets just ignore it
                     continue
-                self.__config[parsed_line[0].lower()] = parsed_line[1]
+                parsed_line[0] = parsed_line[0].lower()
+                # exclude these options:
+                excludeds = ['username', 'passlist', 'saved_scan_file', 'output']
+                if parsed_line[0] not in excludeds:
+                    self.__config[parsed_line[0].lower()] = parsed_line[1]
         
         # then, read the saved attack file, if any:
         self.__saved_attack_file = config.get('saved_scan_file', None)
@@ -173,12 +177,15 @@ class Attacker():
             with open(file = self.__saved_attack_file, mode = 'r') as saved_scan_file:
                 saved_attack_config = json.load(fp = saved_scan_file)
                 # update, only if the new value is NOT None:
+                # but exclude these options:
+                excludeds = ['saved_scan_file']
                 for key in saved_attack_config:
-                    if key not in self.__config:
-                        self.__config[key] = saved_attack_config[key]
-                    else:
-                        if saved_attack_config[key] != None:
+                    if key not in excludeds:
+                        if key not in self.__config:
                             self.__config[key] = saved_attack_config[key]
+                        else:
+                            if saved_attack_config[key] != None:
+                                self.__config[key] = saved_attack_config[key]
         
         # and at last, parse the config, passed to __init__:
         # update, only if the new value is NOT None:
@@ -225,20 +232,24 @@ class Attacker():
                     self.__passlist_lines_count,
                     int((self.__total_scanned / self.__passlist_lines_count) * 10000) / 100
                 ), end = '')
-                cur_status = {
-                    'username' : self.__config['username'],
-                    'passlist' : self.__passlist,
-                    'threads' : self.__threads,
-                    'totalscanned' : self.__total_scanned,
-                    'usetor' : self.__config['usetor'],
-                    'torhostname' : self.__config['torhostname'],
-                    'torsocksport' : self.__config['torsocksport'],
-                    'torcontrolport' : self.__config['torcontrolport'],
-                    'torcontrolportpassword' : self.__config['torcontrolportpassword']
-                }
-                cur_status = json.dumps(cur_status)
-                with open(file = '%s.isb' % self.__config['username'], mode = 'w') as continue_attack_file:
-                    continue_attack_file.write(cur_status)
+                if self.__config['output'] != None:
+                    # we should save scan info in a file
+                    cur_status = {
+                        'username' : self.__config['username'],
+                        'passlist' : self.__passlist,
+                        'threads' : self.__threads,
+                        'output' : self.__config['output'],
+                        'totalscanned' : self.__total_scanned,
+                        'usetor' : self.__config['usetor'],
+                        'torhostname' : self.__config['torhostname'],
+                        'torsocksport' : self.__config['torsocksport'],
+                        'torcontrolport' : self.__config['torcontrolport'],
+                        'torcontrolportpassword' : self.__config['torcontrolportpassword']
+                    }
+                    cur_status = json.dumps(cur_status) # be efficient and re-use variables :)
+                    for output_file in self.__config['output']:
+                        with open(file = output_file, mode = 'w') as continue_attack_file:
+                            continue_attack_file.write(cur_status)
 
         def on_error(error_code):
             # If there is any error, this callback will trigger. The `error_code` shows what was the

@@ -10,9 +10,9 @@ strings = {
 }
 
 parser = argparse.ArgumentParser(description = strings['DESCRIPTION'])
+parser.add_argument('username', action = 'store', nargs = '?', default = None)
+parser.add_argument('passlist', action = 'store', nargs = '?', default = None)
 parser.add_argument('-c', '--continue-scan', action = 'store', default = None, dest = 'saved_scan_file')
-parser.add_argument('-u', '--username', action = 'store', default = None)
-parser.add_argument('-p', '--passlist', action = 'store', default = None)
 parser.add_argument('-t' ,'--threads', action = 'store', default = None, type = int)
 
 args = vars(parser.parse_args())
@@ -20,7 +20,7 @@ args = vars(parser.parse_args())
 # validate `args`: numbers
 if args['saved_scan_file'] == None:
     if args['username'] == None or args['passlist'] == None:
-        parser.error('Not enough arguments: either username and passlist, or saved_scan_file should be given.')
+        parser.error('Not enough arguments: Missing username or passlist')
 
 # validate `args`: values
 for key in args:

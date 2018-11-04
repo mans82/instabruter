@@ -198,6 +198,34 @@ class Attacker():
                 else:
                     if config[key] != None:
                         self.__config[key] = config[key]
+        
+        # list of required config items:
+        required_configs = ['username', 'passlist']
+
+        # list of config items that depend on other config items:
+        # (These are unrequired arguments themselves, but they need their dependencies):
+        depended_configs = {
+            'usetor': [
+                'torhostname',
+                'torsocksport',
+                'torcontrolport',
+                'torcontrolportpassword'
+            ]
+        }
+
+        for item in required_configs:
+            if item not in self.__config:
+                # this is an error
+                print('error: required configuration not found: \'%s\'' % item, file = stderr)
+                sysexit(1)
+        
+        for item in depended_configs:
+            if item in self.__config:
+                for dep_item in depended_configs[item]:
+                    if dep_item not in self.__config:
+                        print('error: depended configuration for \'%s\' not found: \'%s\'' % (item, dep_item), file = stderr)
+                        sysexit(1)
+
 
         self.__passlist = self.__config['passlist']
         self.__threads = int(self.__config.get('threads', 8))

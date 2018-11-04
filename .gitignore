@@ -2,5 +2,4 @@
 *.txt
 __pycache__
 .vscode
-instabruter.conf
 *.isb

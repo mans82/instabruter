@@ -15,6 +15,7 @@ parser.add_argument('passlist', action = 'store', nargs = '?', default = None)
 parser.add_argument('-c', '--continue-scan', action = 'store', default = None, dest = 'saved_scan_file')
 parser.add_argument('-t' ,'--threads', action = 'store', default = None, type = int)
 parser.add_argument('-o', '--output', action = 'store', nargs = '+', default = None)
+parser.add_argument('--config', action = 'store')
 
 args = vars(parser.parse_args())
 
@@ -25,7 +26,7 @@ if args['saved_scan_file'] == None:
 
 # validate `args`: values
 # these are files. We validate them the same way
-file_args = ['passlist', 'saved_scan_file']
+file_args = ['passlist', 'saved_scan_file', 'config']
 
 for key in args:
     if args[key] == None:

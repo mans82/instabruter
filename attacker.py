@@ -159,7 +159,9 @@ class Attacker():
         self.__config = {}
 
         # set the config file path:
-        self.__config['config'] = config.get('config', 'instabruter.conf')
+        self.__config['config'] = config['config']
+        if self.__config['config'] == None:
+            self.__config['config'] = 'instabruter.conf'
 
         # first, read config file:
         self.__config_file = config.get('config_file', self.__config['config'])

@@ -56,7 +56,7 @@ Here are some examples:
 ## What is the instabruter.conf?
 It is the configuration file of instabruter. Any configuration that is not mentioned in runtime arguments or saved attack file will be read from this file. For example if you have this line in `instabruter.conf`:
 
-    ThreadCount 20
+    Threads 20
 And run:
 
     python main.py username passlist.txt

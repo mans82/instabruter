@@ -22,23 +22,43 @@ You need to install `requests` python library:
     pip install requests
 ## How to use?
 Here are some examples:
-* Start an attack, using a username and a passlist, and 20 threads:
+* Start an attack, using a username and a passlist:
 
-      python main.py -u username -p passlist.txt -t 20
+      python main.py username passlist.txt
 
-* Resume an attack (Yes you can pause the attack and resume it later), from a resume-attack file (here we named it `username.isb`):
+* Start an attack, using an arbitary number of threads (e.g. 32):
 
-      python main.py -c username.isb
+      python main.py username passlist.txt -t 32
+  or
 
-* Resume an attack, but use 30 threads instead:
+      python main.py username passlist.txt --threads=32
 
-      python main.py -c username.isb -t 30
+* Save the attack status, so that you can resume the attack later:
+  (Scan status will be saved in `myscan` file.)
+
+      python main.py username passlist.txt -o myscan
+  Or use the long option, `--output`, instead of `-o`.
+
+* Now to resume the attack:  
+  (long option is `--continue`)
+
+      python main.py -c myscan
+
+* Resume an attack, but use 30 threads instead:  
+  (Note that this will be saved to `myscan`)
+
+      python main.py -c myscan -t 30
+* Provide another config file, rather than `instabruter.conf`:  
+  (There is no short option, sry :( )
+
+      python main.py username passlist.txt --config myconfig.conf
 
 ## What is the instabruter.conf?
-It is the configuration file of instabruter. Any configuration that is not mentioned in runtime arguments or resume-attack file will be read from this file. For example if you have this line in `instabruter.conf`:
+It is the configuration file of instabruter. Any configuration that is not mentioned in runtime arguments or saved attack file will be read from this file. For example if you have this line in `instabruter.conf`:
 
     ThreadCount 20
 And run:
 
-    python main.py -u username -p passlist.txt
-instabruter will use 20 thread for the attack, as defined in the config file.
+    python main.py username passlist.txt
+, instabruter will use 20 thread for the attack, as defined in the config file.  
+Note that command-line arguments will override these configurations.

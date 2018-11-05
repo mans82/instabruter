@@ -158,8 +158,13 @@ class Attacker():
         # all the config goes here:
         self.__config = {}
 
+        # set the config file path:
+        self.__config['config'] = config['config']
+        if self.__config['config'] == None:
+            self.__config['config'] = 'instabruter.conf'
+
         # first, read config file:
-        self.__config_file = config.get('config_file', 'instabruter.conf')
+        self.__config_file = config.get('config_file', self.__config['config'])
         with open(file = self.__config_file, mode = 'r') as config_file:
             for line in config_file:
                 parsed_line = line[:-1].split(' ') # [:-1] : for removing the \n from end of `line`
@@ -167,7 +172,7 @@ class Attacker():
                     continue
                 parsed_line[0] = parsed_line[0].lower()
                 # exclude these options:
-                excludeds = ['username', 'passlist', 'saved_scan_file', 'output']
+                excludeds = ['username', 'passlist', 'saved_scan_file', 'output', 'config']
                 if parsed_line[0] not in excludeds:
                     self.__config[parsed_line[0].lower()] = parsed_line[1]
         
@@ -178,7 +183,7 @@ class Attacker():
                 saved_attack_config = json.load(fp = saved_scan_file)
                 # update, only if the new value is NOT None:
                 # but exclude these options:
-                excludeds = ['saved_scan_file']
+                excludeds = ['saved_scan_file', 'config']
                 for key in saved_attack_config:
                     if key not in excludeds:
                         if key not in self.__config:
@@ -196,6 +201,32 @@ class Attacker():
                     if config[key] != None:
                         self.__config[key] = config[key]
         
+        # list of required config items:
+        required_configs = ['username', 'passlist']
+
+        # list of config items that depend on other config items:
+        # (These are unrequired arguments themselves, but they need their dependencies):
+        depended_configs = {
+            'usetor': [
+                'torhostname',
+                'torsocksport',
+                'torcontrolport',
+                'torcontrolportpassword'
+            ]
+        }
+
+        for item in required_configs:
+            if item not in self.__config:
+                # this is an error
+                print('error: required configuration not found: \'%s\'' % item, file = stderr)
+                sysexit(1)
+        
+        for item in depended_configs:
+            if item in self.__config:
+                for dep_item in depended_configs[item]:
+                    if dep_item not in self.__config:
+                        print('error: depended configuration for \'%s\' not found: \'%s\'' % (item, dep_item), file = stderr)
+                        sysexit(1)
 
 
         self.__passlist = self.__config['passlist']

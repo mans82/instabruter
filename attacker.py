@@ -295,8 +295,11 @@ class Attacker():
             bruter.start()
             print(' ==> Starting thread: %s/%s\r' % (i + 1, self.__threads), end = '')
 
-        print()        
-        print(' ==> Starting attack for %s' % self.__config['username'])
+        print()
+        print(' ==> %sing attack for %s' % (
+            'Start' if self.__config['saved_scan_file'] == None else 'Resum',
+            self.__config['username'])
+        )
     
     def stop(self):
         for bruter in self.__bruters:

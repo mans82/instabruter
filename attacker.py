@@ -3,6 +3,7 @@ import threading
 import json
 from time import sleep
 from sys import exit as sysexit, stderr
+import log
 
 class Bruter(threading.Thread):
 
@@ -258,11 +259,11 @@ class Attacker():
                 sysexit(0)
             else:
                 self.__total_scanned += 1
-                print('\r ==> Scanning: %s/%s (%s%%)' % (
+                log.log_i('Scanning: %s/%s (%s%%)' % (
                     self.__total_scanned,
                     self.__passlist_lines_count,
                     int((self.__total_scanned / self.__passlist_lines_count) * 10000) / 100
-                ), end = '')
+                ), end = '\r')
                 if self.__config['output'] != None:
                     # we should save scan info in a file
                     cur_status = {
@@ -293,10 +294,10 @@ class Attacker():
             bruter = Bruter(self.__config['username'], self.__passlist_file, self.__config, on_success, on_error, i + 1)
             self.__bruters.append(bruter)
             bruter.start()
-            print(' ==> Starting thread: %s/%s\r' % (i + 1, self.__threads), end = '')
+            log.log_i('Starting thread: %s/%s\r' % (i + 1, self.__threads), end = '')
 
         print()
-        print(' ==> %sing attack for %s' % (
+        log.log_i('%sing attack for %s' % (
             'Start' if self.__config['saved_scan_file'] == None else 'Resum',
             self.__config['username'])
         )

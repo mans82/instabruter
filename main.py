@@ -4,6 +4,7 @@ from os.path import isfile, exists
 from time import sleep
 from attacker import Attacker
 import argparse
+import log
 
 strings = {
     'DESCRIPTION' : 'A tool for brute-forcing instagram accounts, with support for Tor.'
@@ -46,7 +47,7 @@ try:
     print()
 except KeyboardInterrupt:
     print()
-    print(' ==> Exiting... might take a while...')
+    log.log_i('Exiting... might take a while...')
     attacker.stop()
     attacker.block()
     print()
